@@ -1,0 +1,23 @@
+{
+	"name": "SinkBlobJSONFilename",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "StorageAccountLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"filename": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "sink"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

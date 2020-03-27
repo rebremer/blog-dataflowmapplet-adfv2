@@ -1,0 +1,20 @@
+{
+	"name": "StagingBlobParquet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "StorageAccountLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "staging"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

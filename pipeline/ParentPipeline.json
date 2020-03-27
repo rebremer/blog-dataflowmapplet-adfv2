@@ -1,0 +1,245 @@
+{
+	"name": "ParentPipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "LoopTables",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.table_items",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "TableToParquet",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "@concat('SELECT TOP 1 * FROM ', item().source.schema, '.', item().source.table)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "SourceSqlTable",
+									"type": "DatasetReference",
+									"parameters": {
+										"schema": "@item().source.schema",
+										"table": "@item().source.table"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "StagingBlobFilenameParquet",
+									"type": "DatasetReference",
+									"parameters": {
+										"filename": {
+											"value": "@concat(item().source.table, pipeline().RunId, 'lookup.parquet')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "DFAddColumn",
+							"type": "ExecuteDataFlow",
+							"dependsOn": [
+								{
+									"activity": "TableToParquet",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataflow": {
+									"referenceName": "DataFlowsAddColumn",
+									"type": "DataFlowReference",
+									"parameters": {
+										"in_filename": {
+											"value": "'@{concat(item().source.table, pipeline().RunId, 'lookup.parquet')}'",
+											"type": "Expression"
+										},
+										"out_filename": {
+											"value": "'@{concat(item().source.table, pipeline().RunId, 'addcolumn.parquet')}'",
+											"type": "Expression"
+										},
+										"in_extraColumn": {
+											"value": "'@{'newcolumn1'}'",
+											"type": "Expression"
+										}
+									}
+								},
+								"integrationRuntime": {
+									"referenceName": "TimeToLive30min",
+									"type": "IntegrationRuntimeReference"
+								}
+							}
+						},
+						{
+							"name": "DFRenameColumn",
+							"type": "ExecuteDataFlow",
+							"dependsOn": [
+								{
+									"activity": "DFAddColumn",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataflow": {
+									"referenceName": "DataFlowsRemoveDuplicateColumn",
+									"type": "DataFlowReference",
+									"parameters": {
+										"in_filename": {
+											"value": "'@{concat(item().source.table, pipeline().RunId, 'addcolumn.parquet')}'",
+											"type": "Expression"
+										},
+										"out_filename": {
+											"value": "'@{concat(item().source.table, pipeline().RunId, 'renamecolumn.parquet')}'",
+											"type": "Expression"
+										}
+									}
+								},
+								"integrationRuntime": {
+									"referenceName": "TimeToLive30min",
+									"type": "IntegrationRuntimeReference"
+								}
+							}
+						},
+						{
+							"name": "ParquetToJSON",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "DFRenameColumn",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "ParquetSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings",
+										"quoteAllText": true
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "StagingBlobFilenameParquet",
+									"type": "DatasetReference",
+									"parameters": {
+										"filename": "@concat(item().source.table, pipeline().RunId, 'renamecolumn.parquet')"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "SinkBlobJSONFilename",
+									"type": "DatasetReference",
+									"parameters": {
+										"filename": {
+											"value": "@concat(item().source.table, pipeline().RunId, 'final.JSON')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"table_items": {
+				"type": "string",
+				"defaultValue": [
+					{
+						"source": {
+							"schema": "dbo",
+							"table": "SalesLTProduct"
+						},
+						"destination": {
+							"fileName": "SalesLTProduct.txt"
+						}
+					},
+					{
+						"source": {
+							"schema": "dbo",
+							"table": "SalesLTCustomer"
+						},
+						"destination": {
+							"fileName": "SalesLTContainer.txt"
+						}
+					}
+				]
+			}
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
