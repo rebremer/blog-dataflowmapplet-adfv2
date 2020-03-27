@@ -12,6 +12,7 @@
 						"value": "@pipeline().parameters.table_items",
 						"type": "Expression"
 					},
+					"isSequential": true,
 					"activities": [
 						{
 							"name": "TableToParquet",
