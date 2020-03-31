@@ -1,0 +1,14 @@
+{
+	"name": "AzureFunction",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "RestService",
+		"typeProperties": {
+			"url": "https://test-funcappaad-fun.azurewebsites.net/api/HttpExample?code=MFMf5pW08pGIdwJhabVSG4kDRJYWmEUOMnHgk2YCqkdXRWWbryQAXg==&name=feyenoord",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "ManagedServiceIdentity",
+			"aadResourceId": "https://test-funcappaad-fun.azurewebsites.net"
+		}
+	}
+}
