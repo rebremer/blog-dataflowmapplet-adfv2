@@ -1,5 +1,5 @@
 {
-	"name": "AzureFunctionTest",
+	"name": "zzzAzureFunctionTest",
 	"properties": {
 		"activities": [
 			{
@@ -35,7 +35,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "RestResource1",
+						"referenceName": "zzzRestResource1",
 						"type": "DatasetReference"
 					}
 				],

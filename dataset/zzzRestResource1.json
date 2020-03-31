@@ -1,5 +1,5 @@
 {
-	"name": "RestResource1",
+	"name": "zzzRestResource1",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureFunction",
