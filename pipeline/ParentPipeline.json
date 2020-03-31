@@ -57,7 +57,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"filename": {
-											"value": "@concat(item().source.table, pipeline().RunId, 'lookup.parquet')",
+											"value": "@concat(item().table, pipeline().RunId, 'lookup.parquet')",
 											"type": "Expression"
 										}
 									}
