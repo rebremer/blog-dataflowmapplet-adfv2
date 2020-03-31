@@ -47,7 +47,7 @@
 									"referenceName": "SourceSqlTable",
 									"type": "DatasetReference",
 									"parameters": {
-										"table": "@item().source.table"
+										"table": "@item().table"
 									}
 								}
 							],
