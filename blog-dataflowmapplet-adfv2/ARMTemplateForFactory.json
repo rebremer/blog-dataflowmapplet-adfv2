@@ -119,15 +119,15 @@
 											"type": "DataFlowReference",
 											"parameters": {
 												"in_filename": {
-													"value": "'@{concat(item().source.table, pipeline().RunId, 'lookup.parquet')}'",
+													"value": "'@{concat(item().table, pipeline().RunId, 'lookup.parquet')}'",
 													"type": "Expression"
 												},
 												"out_filename": {
-													"value": "'@{concat(item().source.table, pipeline().RunId, 'addcolumn.parquet')}'",
+													"value": "'@{concat(item().table, pipeline().RunId, 'addcolumn.parquet')}'",
 													"type": "Expression"
 												},
 												"in_extraColumn": {
-													"value": "'@{concat(item().source.table, 'newcolumn')}'",
+													"value": "'@{concat(item().table, 'newcolumn')}'",
 													"type": "Expression"
 												}
 											},
@@ -168,11 +168,11 @@
 											"type": "DataFlowReference",
 											"parameters": {
 												"in_filename": {
-													"value": "'@{concat(item().source.table, pipeline().RunId, 'addcolumn.parquet')}'",
+													"value": "'@{concat(item().table, pipeline().RunId, 'addcolumn.parquet')}'",
 													"type": "Expression"
 												},
 												"out_filename": {
-													"value": "'@{concat(item().source.table, pipeline().RunId, 'removeduplicate.parquet')}'",
+													"value": "'@{concat(item().table, pipeline().RunId, 'removeduplicate.parquet')}'",
 													"type": "Expression"
 												}
 											},
@@ -232,7 +232,7 @@
 											"referenceName": "StagingBlobFilenameParquet",
 											"type": "DatasetReference",
 											"parameters": {
-												"filename": "@concat(item().source.table, pipeline().RunId, 'removeduplicate.parquet')"
+												"filename": "@concat(item().table, pipeline().RunId, 'removeduplicate.parquet')"
 											}
 										}
 									],
@@ -241,7 +241,7 @@
 											"referenceName": "SinkBlobJSONFilename",
 											"type": "DatasetReference",
 											"parameters": {
-												"filename": "@concat(item().source.table, pipeline().RunId, 'final.json')"
+												"filename": "@concat(item().table, pipeline().RunId, 'final.json')"
 											}
 										}
 									]
