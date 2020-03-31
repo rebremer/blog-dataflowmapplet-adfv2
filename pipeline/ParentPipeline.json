@@ -216,22 +216,16 @@
 				"type": "string",
 				"defaultValue": [
 					{
-						"source": {
-							"schema": "dbo",
-							"table": "SalesLTProduct"
-						},
-						"destination": {
-							"fileName": "SalesLTProduct.txt"
-						}
+						"table": "dbo.SalesLTProduct"
 					},
 					{
-						"source": {
-							"schema": "dbo",
-							"table": "SalesLTCustomer"
-						},
-						"destination": {
-							"fileName": "SalesLTContainer.txt"
-						}
+						"table": "dbo.SalesLTCustomer"
+					},
+					{
+						"table": "dbo.SalesLTSalesOrderDetail"
+					},
+					{
+						"table": "dbo.SalesLTSalesOrderHeader"
 					}
 				]
 			}
