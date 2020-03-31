@@ -45,10 +45,7 @@
 							"inputs": [
 								{
 									"referenceName": "SourceSqlTable",
-									"type": "DatasetReference",
-									"parameters": {
-										"table": "@item().table"
-									}
+									"type": "DatasetReference"
 								}
 							],
 							"outputs": [
