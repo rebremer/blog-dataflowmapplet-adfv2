@@ -592,7 +592,7 @@
 							"name": "DerivedColumn1"
 						}
 					],
-					"script": "parameters{\n\tin_filename as string,\n\tout_filename as string,\n\tin_extraColumn as string\n}\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\twildcardPaths:[($in_filename)]) ~> source1\nsource1 derive(newcolumn = \"feyenoord\") ~> DerivedColumn1\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+					"script": "parameters{\n\tin_filename as string,\n\tout_filename as string,\n\tin_extraColumn as string\n}\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\twildcardPaths:[($in_filename)]) ~> source1\nsource1 derive(newcolumn = \"feyenoord\") ~> DerivedColumn1\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:[($out_filename)],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
 				}
 			},
 			"dependsOn": [
