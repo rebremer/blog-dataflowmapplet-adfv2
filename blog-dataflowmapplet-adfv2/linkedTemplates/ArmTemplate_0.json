@@ -157,9 +157,6 @@
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"schema": {
-						"type": "string"
-					},
 					"table": {
 						"type": "string"
 					}
@@ -168,10 +165,7 @@
 				"type": "AzureSqlTable",
 				"schema": [],
 				"typeProperties": {
-					"schema": {
-						"value": "@dataset().schema",
-						"type": "Expression"
-					},
+					"schema": "dbo",
 					"table": {
 						"value": "@dataset().table",
 						"type": "Expression"
@@ -331,7 +325,7 @@
 							"name": "DerivedColumn1"
 						}
 					],
-					"script": "parameters{\n\tin_filename as string,\n\tout_filename as string,\n\tin_extraColumn as string\n}\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\twildcardPaths:[($in_filename)]) ~> source1\nsource1 derive(newcolumn = \"feyenoord\") ~> DerivedColumn1\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:[($out_filename)],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+					"script": "parameters{\n\tin_filename as string,\n\tout_filename as string,\n\tin_extraColumn as string\n}\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\twildcardPaths:[($in_filename)]) ~> source1\nsource1 derive({$in_extraColumn} = concat(toString(byPosition(1)), toString(byPosition(2))),\n\t\tModifiedDate = 'testrb') ~> DerivedColumn1\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:[($out_filename)],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
 				}
 			},
 			"dependsOn": [
@@ -408,7 +402,7 @@
 										"source": {
 											"type": "AzureSqlSource",
 											"sqlReaderQuery": {
-												"value": "@concat('SELECT * FROM ', item().source.schema, '.', item().source.table)",
+												"value": "@concat('SELECT * FROM ', item().table)",
 												"type": "Expression"
 											},
 											"queryTimeout": "02:00:00"
@@ -426,7 +420,6 @@
 											"referenceName": "SourceSqlTable",
 											"type": "DatasetReference",
 											"parameters": {
-												"schema": "@item().source.schema",
 												"table": "@item().source.table"
 											}
 										}
@@ -477,7 +470,7 @@
 													"type": "Expression"
 												},
 												"in_extraColumn": {
-													"value": "'@{'newcolumn1'}'",
+													"value": "'@{concat(item().source.table, 'newcolumn')}'",
 													"type": "Expression"
 												}
 											},
@@ -605,22 +598,16 @@
 						"type": "string",
 						"defaultValue": [
 							{
-								"source": {
-									"schema": "dbo",
-									"table": "SalesLTProduct"
-								},
-								"destination": {
-									"fileName": "SalesLTProduct.txt"
-								}
+								"table": "SalesLTProduct"
 							},
 							{
-								"source": {
-									"schema": "dbo",
-									"table": "SalesLTCustomer"
-								},
-								"destination": {
-									"fileName": "SalesLTContainer.txt"
-								}
+								"table": "SalesLTCustomer"
+							},
+							{
+								"table": "SalesLTSalesOrderDetail"
+							},
+							{
+								"table": "SalesLTSalesOrderHeader"
 							}
 						]
 					}

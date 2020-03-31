@@ -1,0 +1,318 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "blog-dataflowmapplet-adfv2"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/ParentPipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LoopTables",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.table_items",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "TableToParquet",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "@concat('SELECT * FROM ', item().table)",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceSqlTable",
+											"type": "DatasetReference",
+											"parameters": {
+												"table": "@item().source.table"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "StagingBlobFilenameParquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"filename": {
+													"value": "@concat(item().source.table, pipeline().RunId, 'lookup.parquet')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "DFAddColumn",
+									"type": "ExecuteDataFlow",
+									"dependsOn": [
+										{
+											"activity": "TableToParquet",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataflow": {
+											"referenceName": "DataFlowsAddColumn",
+											"type": "DataFlowReference",
+											"parameters": {
+												"in_filename": {
+													"value": "'@{concat(item().source.table, pipeline().RunId, 'lookup.parquet')}'",
+													"type": "Expression"
+												},
+												"out_filename": {
+													"value": "'@{concat(item().source.table, pipeline().RunId, 'addcolumn.parquet')}'",
+													"type": "Expression"
+												},
+												"in_extraColumn": {
+													"value": "'@{concat(item().source.table, 'newcolumn')}'",
+													"type": "Expression"
+												}
+											}
+										},
+										"integrationRuntime": {
+											"referenceName": "TimeToLive30min",
+											"type": "IntegrationRuntimeReference"
+										}
+									}
+								},
+								{
+									"name": "DFRemoveDuplicate",
+									"type": "ExecuteDataFlow",
+									"dependsOn": [
+										{
+											"activity": "DFAddColumn",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataflow": {
+											"referenceName": "DataFlowsRemoveDuplicateColumn",
+											"type": "DataFlowReference",
+											"parameters": {
+												"in_filename": {
+													"value": "'@{concat(item().source.table, pipeline().RunId, 'addcolumn.parquet')}'",
+													"type": "Expression"
+												},
+												"out_filename": {
+													"value": "'@{concat(item().source.table, pipeline().RunId, 'removeduplicate.parquet')}'",
+													"type": "Expression"
+												}
+											}
+										},
+										"integrationRuntime": {
+											"referenceName": "TimeToLive30min",
+											"type": "IntegrationRuntimeReference"
+										}
+									}
+								},
+								{
+									"name": "ParquetToJSON",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "DFRemoveDuplicate",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "ParquetSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true
+											}
+										},
+										"sink": {
+											"type": "JsonSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "JsonWriteSettings",
+												"quoteAllText": true
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "StagingBlobFilenameParquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"filename": "@concat(item().source.table, pipeline().RunId, 'removeduplicate.parquet')"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "SinkBlobJSONFilename",
+											"type": "DatasetReference",
+											"parameters": {
+												"filename": "@concat(item().source.table, pipeline().RunId, 'final.json')"
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"table_items": {
+						"type": "string",
+						"defaultValue": [
+							{
+								"table": "SalesLTProduct"
+							},
+							{
+								"table": "SalesLTCustomer"
+							},
+							{
+								"table": "SalesLTSalesOrderDetail"
+							},
+							{
+								"table": "SalesLTSalesOrderHeader"
+							}
+						]
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SourceSqlTable')]",
+				"[concat(variables('factoryId'), '/dataflows/DataFlowsAddColumn')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceSqlTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabaseLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"table": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataFlowsAddColumn')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "StagingBlobParquet",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "StagingBlobParquet",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "DerivedColumn1"
+						}
+					],
+					"script": "parameters{\n\tin_filename as string,\n\tout_filename as string,\n\tin_extraColumn as string\n}\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\twildcardPaths:[($in_filename)]) ~> source1\nsource1 derive({$in_extraColumn} = concat(toString(byPosition(1)), toString(byPosition(2))),\n\t\tModifiedDate = 'testrb') ~> DerivedColumn1\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:[($out_filename)],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
