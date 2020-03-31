@@ -97,7 +97,7 @@
 											"type": "Expression"
 										},
 										"in_extraColumn": {
-											"value": "'@{'newcolumn1'}'",
+											"value": "'@{concat(item().source.table, 'newcolumn')}'",
 											"type": "Expression"
 										}
 									}
