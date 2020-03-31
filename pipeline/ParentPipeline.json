@@ -47,7 +47,6 @@
 									"referenceName": "SourceSqlTable",
 									"type": "DatasetReference",
 									"parameters": {
-										"schema": "@item().source.schema",
 										"table": "@item().source.table"
 									}
 								}
@@ -216,16 +215,16 @@
 				"type": "string",
 				"defaultValue": [
 					{
-						"table": "dbo.SalesLTProduct"
+						"table": "SalesLTProduct"
 					},
 					{
-						"table": "dbo.SalesLTCustomer"
+						"table": "SalesLTCustomer"
 					},
 					{
-						"table": "dbo.SalesLTSalesOrderDetail"
+						"table": "SalesLTSalesOrderDetail"
 					},
 					{
-						"table": "dbo.SalesLTSalesOrderHeader"
+						"table": "SalesLTSalesOrderHeader"
 					}
 				]
 			}
