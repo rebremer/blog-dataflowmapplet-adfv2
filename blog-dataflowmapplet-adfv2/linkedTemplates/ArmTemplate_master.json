@@ -1,0 +1,70 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "blog-dataflowmapplet-adfv2"
+		},
+		"AzureSqlDatabaseLinkedService_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabaseLinkedService'"
+		},
+		"StorageAccountLinkedService_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'StorageAccountLinkedService'"
+		},
+		"AzureFunction_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://test-funcappaad-fun.azurewebsites.net/api/HttpExample?code=MFMf5pW08pGIdwJhabVSG4kDRJYWmEUOMnHgk2YCqkdXRWWbryQAXg==&name=feyenoord"
+		},
+		"AzureFunction_properties_typeProperties_aadResourceId": {
+			"type": "string",
+			"defaultValue": "https://test-funcappaad-fun.azurewebsites.net"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureSqlDatabaseLinkedService_connectionString": {
+						"value": "[parameters('AzureSqlDatabaseLinkedService_connectionString')]"
+					},
+					"StorageAccountLinkedService_connectionString": {
+						"value": "[parameters('StorageAccountLinkedService_connectionString')]"
+					},
+					"AzureFunction_properties_typeProperties_url": {
+						"value": "[parameters('AzureFunction_properties_typeProperties_url')]"
+					},
+					"AzureFunction_properties_typeProperties_aadResourceId": {
+						"value": "[parameters('AzureFunction_properties_typeProperties_aadResourceId')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "blog-dataflowmapplet-adfv2"
+		},
+		"AzureSqlDatabaseLinkedService_connectionString": {
+			"value": ""
+		},
+		"StorageAccountLinkedService_connectionString": {
+			"value": ""
+		},
+		"AzureFunction_properties_typeProperties_url": {
+			"value": "https://test-funcappaad-fun.azurewebsites.net/api/HttpExample?code=MFMf5pW08pGIdwJhabVSG4kDRJYWmEUOMnHgk2YCqkdXRWWbryQAXg==&name=feyenoord"
+		},
+		"AzureFunction_properties_typeProperties_aadResourceId": {
+			"value": "https://test-funcappaad-fun.azurewebsites.net"
+		}
+	}
+}
