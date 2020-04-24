@@ -118,57 +118,7 @@
 							46,
 							47,
 							48,
-							49,
-							50,
-							51,
-							52,
-							53,
-							54,
-							55,
-							56,
-							57,
-							58,
-							59,
-							60,
-							61,
-							62,
-							63,
-							64,
-							65,
-							66,
-							67,
-							68,
-							69,
-							70,
-							71,
-							72,
-							73,
-							74,
-							75,
-							76,
-							77,
-							78,
-							79,
-							80,
-							81,
-							82,
-							83,
-							84,
-							85,
-							86,
-							87,
-							88,
-							89,
-							90,
-							91,
-							92,
-							93,
-							94,
-							95,
-							96,
-							97,
-							98,
-							99
+							49
 						]
 					}
 				},
@@ -288,7 +238,7 @@
 										},
 										"staging": {},
 										"integrationRuntime": {
-											"referenceName": "TimeToLive30min",
+											"referenceName": "128coreTTL30",
 											"type": "IntegrationRuntimeReference"
 										}
 									}
@@ -333,7 +283,7 @@
 										},
 										"staging": {},
 										"integrationRuntime": {
-											"referenceName": "TimeToLive30min",
+											"referenceName": "128coreTTL30",
 											"type": "IntegrationRuntimeReference"
 										}
 									}
@@ -425,7 +375,7 @@
 				"[concat(variables('factoryId'), '/datasets/SourceSqlTable')]",
 				"[concat(variables('factoryId'), '/datasets/StagingBlobFilenameParquet')]",
 				"[concat(variables('factoryId'), '/dataflows/DataFlowsAddColumn')]",
-				"[concat(variables('factoryId'), '/integrationRuntimes/TimeToLive30min')]",
+				"[concat(variables('factoryId'), '/integrationRuntimes/128coreTTL30')]",
 				"[concat(variables('factoryId'), '/dataflows/DataFlowsRemoveDuplicateColumn')]",
 				"[concat(variables('factoryId'), '/datasets/SinkBlobJSONFilename')]"
 			]
@@ -647,12 +597,12 @@
 					"connectionString": "[parameters('AzureSqlDatabaseLinkedService_connectionString')]"
 				},
 				"connectVia": {
-					"referenceName": "TimeToLive30min",
+					"referenceName": "128coreTTL30",
 					"type": "IntegrationRuntimeReference"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/TimeToLive30min')]"
+				"[concat(variables('factoryId'), '/integrationRuntimes/128coreTTL30')]"
 			]
 		},
 		{
@@ -666,32 +616,13 @@
 					"connectionString": "[parameters('StorageAccountLinkedService_connectionString')]"
 				},
 				"connectVia": {
-					"referenceName": "TimeToLive30min",
+					"referenceName": "128coreTTL30",
 					"type": "IntegrationRuntimeReference"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/TimeToLive30min')]"
+				"[concat(variables('factoryId'), '/integrationRuntimes/128coreTTL30')]"
 			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/TimeToLive30min')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "Managed",
-				"typeProperties": {
-					"computeProperties": {
-						"location": "AutoResolve",
-						"dataFlowProperties": {
-							"computeType": "General",
-							"coreCount": 8,
-							"timeToLive": 30
-						}
-					}
-				}
-			},
-			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DataFlowsAddColumn')]",
@@ -766,6 +697,26 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/StagingBlobParquet')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/128coreTTL30')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"description": "128coreTTL30",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 144,
+							"timeToLive": 30
+						}
+					}
+				}
+			},
+			"dependsOn": []
 		}
 	]
 }
