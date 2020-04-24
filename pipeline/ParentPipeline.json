@@ -100,7 +100,7 @@
 									}
 								},
 								"integrationRuntime": {
-									"referenceName": "128coreTTL30",
+									"referenceName": "TTL30min",
 									"type": "IntegrationRuntimeReference"
 								}
 							}
@@ -140,7 +140,7 @@
 									}
 								},
 								"integrationRuntime": {
-									"referenceName": "128coreTTL30",
+									"referenceName": "TTL30min",
 									"type": "IntegrationRuntimeReference"
 								}
 							}
