@@ -65,6 +65,26 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/TTL30min')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"description": "TTL30min",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 30
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/zzzRestResource1')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -93,12 +113,12 @@
 					"connectionString": "[parameters('AzureSqlDatabaseLinkedService_connectionString')]"
 				},
 				"connectVia": {
-					"referenceName": "128coreTTL30",
+					"referenceName": "TTL30min",
 					"type": "IntegrationRuntimeReference"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/128coreTTL30')]"
+				"[concat(variables('factoryId'), '/integrationRuntimes/TTL30min')]"
 			]
 		},
 		{
@@ -112,12 +132,12 @@
 					"connectionString": "[parameters('StorageAccountLinkedService_connectionString')]"
 				},
 				"connectVia": {
-					"referenceName": "128coreTTL30",
+					"referenceName": "TTL30min",
 					"type": "IntegrationRuntimeReference"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/128coreTTL30')]"
+				"[concat(variables('factoryId'), '/integrationRuntimes/TTL30min')]"
 			]
 		},
 		{
@@ -476,7 +496,7 @@
 										},
 										"staging": {},
 										"integrationRuntime": {
-											"referenceName": "128coreTTL30",
+											"referenceName": "TTL30min",
 											"type": "IntegrationRuntimeReference"
 										}
 									}
@@ -521,7 +541,7 @@
 										},
 										"staging": {},
 										"integrationRuntime": {
-											"referenceName": "128coreTTL30",
+											"referenceName": "TTL30min",
 											"type": "IntegrationRuntimeReference"
 										}
 									}
@@ -613,7 +633,7 @@
 				"[concat(variables('factoryId'), '/datasets/SourceSqlTable')]",
 				"[concat(variables('factoryId'), '/datasets/StagingBlobFilenameParquet')]",
 				"[concat(variables('factoryId'), '/dataflows/DataFlowsAddColumn')]",
-				"[concat(variables('factoryId'), '/integrationRuntimes/128coreTTL30')]",
+				"[concat(variables('factoryId'), '/integrationRuntimes/TTL30min')]",
 				"[concat(variables('factoryId'), '/dataflows/DataFlowsRemoveDuplicateColumn')]",
 				"[concat(variables('factoryId'), '/datasets/SinkBlobJSONFilename')]"
 			]
@@ -678,37 +698,7 @@
 							16,
 							17,
 							18,
-							19,
-							20,
-							21,
-							22,
-							23,
-							24,
-							25,
-							26,
-							27,
-							28,
-							29,
-							30,
-							31,
-							32,
-							33,
-							34,
-							35,
-							36,
-							37,
-							38,
-							39,
-							40,
-							41,
-							42,
-							43,
-							44,
-							45,
-							46,
-							47,
-							48,
-							49
+							19
 						]
 					}
 				},
