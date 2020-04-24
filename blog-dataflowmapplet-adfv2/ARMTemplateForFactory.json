@@ -45,7 +45,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
-							"batchCount": 10,
+							"batchCount": 50,
 							"activities": [
 								{
 									"name": "ParentPipeline",
