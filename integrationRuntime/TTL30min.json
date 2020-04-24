@@ -1,0 +1,17 @@
+{
+	"name": "TTL30min",
+	"properties": {
+		"type": "Managed",
+		"description": "TTL30min",
+		"typeProperties": {
+			"computeProperties": {
+				"location": "AutoResolve",
+				"dataFlowProperties": {
+					"computeType": "General",
+					"coreCount": 8,
+					"timeToLive": 30
+				}
+			}
+		}
+	}
+}
